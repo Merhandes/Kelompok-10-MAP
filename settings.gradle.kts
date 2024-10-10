@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Belajar Android Dasar"
+rootProject.name = "Valet Parking"
 include(":app")
  
