@@ -3,9 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    android:layout_width="310dp"
-    android:layout_height="153dp"
-    tools:context=".MainActivity"
-    android:background="@drawable/logo"
-    android:layout_gravity="center">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".HomeActivity">
+
 </androidx.constraintlayout.widget.ConstraintLayout>
