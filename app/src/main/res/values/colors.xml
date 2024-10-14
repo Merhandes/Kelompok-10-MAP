@@ -3,6 +3,7 @@
     <color name="cerulean">#2781A7</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="grey">#909093</color>
     <color name="sheengold">#B7990D</color>
     <color name="chryslerblue">#5603AD</color>
 </resources>
