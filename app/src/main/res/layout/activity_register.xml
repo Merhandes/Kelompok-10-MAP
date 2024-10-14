@@ -31,7 +31,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:srcCompat="@drawable/rectangle" />
 
-
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textEmail"
         android:layout_width="match_parent"
@@ -40,7 +39,6 @@
         android:padding="14dp"
         app:boxBackgroundMode="filled"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/imageView">
 
@@ -58,7 +56,6 @@
         android:padding="14dp"
         app:boxBackgroundMode="filled"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textEmail"
         app:passwordToggleEnabled="true">
@@ -77,7 +74,6 @@
         android:padding="14dp"
         app:boxBackgroundMode="filled"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textPassword"
         app:passwordToggleEnabled="true">
@@ -96,7 +92,6 @@
         android:padding="14dp"
         app:boxBackgroundMode="filled"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textConfirmationPassword"
         app:passwordToggleEnabled="false">
@@ -104,7 +99,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number" />
+            android:inputType="phone" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
@@ -116,7 +111,6 @@
         android:text="Register"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.615"
         app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
