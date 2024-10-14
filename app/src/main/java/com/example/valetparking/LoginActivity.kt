@@ -12,6 +12,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
         val btnLogin: Button = findViewById(R.id.btnLogin)
         val btnSignup: TextView = findViewById(R.id.btnSignup)
+        val btnForgot: TextView = findViewById(R.id.btnForgot)
 
         btnLogin.setOnClickListener{
             val intent = Intent(this, MainActivity::class.java)
@@ -20,6 +21,10 @@ class LoginActivity : AppCompatActivity() {
 
         btnSignup.setOnClickListener{
             val intent = Intent(this, RegisterActivity::class.java)
+            startActivity(intent)
+        }
+        btnForgot.setOnClickListener{
+            val intent = Intent(this, ForgotActivity::class.java)
             startActivity(intent)
         }
     }

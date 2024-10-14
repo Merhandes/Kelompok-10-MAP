@@ -1,9 +1,12 @@
 package com.example.valetparking
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -14,7 +17,13 @@ class VerificationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_verification)
-        // Declare the OTP input fields as local variables
+        val btnVerify: Button = findViewById(R.id.btnVerify)
+
+        btnVerify.setOnClickListener{
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+        }
+
         val inputCode1: EditText = findViewById(R.id.otp1)
         val inputCode2: EditText = findViewById(R.id.otp2)
         val inputCode3: EditText = findViewById(R.id.otp3)

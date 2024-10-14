@@ -87,7 +87,7 @@
             tools:layout_editor_absoluteY="331dp" />
 
         <TextView
-            android:id="@+id/forgotpassword"
+            android:id="@+id/btnForgot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
