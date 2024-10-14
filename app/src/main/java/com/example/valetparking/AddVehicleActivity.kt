@@ -1,18 +1,23 @@
 package com.example.valetparking
 
+import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -22,111 +27,157 @@ class AddVehicleActivity : AppCompatActivity() {
 
     private lateinit var editTextPlateNumber: EditText
     private lateinit var imageViewVehicle: ImageView
-    private var photoUri: Uri? = null
+    private lateinit var buttonTakePhoto: Button
+    private lateinit var buttonSaveVehicle: Button
+    private lateinit var photoUri: Uri
 
-    private val REQUEST_PERMISSION_CAMERA = 1001
-    private val REQUEST_PERMISSION_STORAGE = 1002
+
+    private lateinit var takePictureLauncher: ActivityResultLauncher<Uri>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_vehicle)
 
-        // Cek dan minta izin
-        checkPermissions()
-
         // Inisialisasi elemen UI
         editTextPlateNumber = findViewById(R.id.edit_text_plate_number)
         imageViewVehicle = findViewById(R.id.image_view_vehicle)
+        buttonTakePhoto = findViewById(R.id.btn_camera)
+        buttonSaveVehicle = findViewById(R.id.button_save_vehicle)
 
-        val buttonTakePhoto: Button = findViewById(R.id.button_take_photo)
-        buttonTakePhoto.setOnClickListener { dispatchTakePictureIntent() }
+        // Inisialisasi ActivityResultLauncher untuk mengambil gambar
+        takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                // Pastikan photoUri sudah diinisialisasi
+                val bitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(photoUri))
+                imageViewVehicle.setImageBitmap(bitmap)
+            } else {
+                Toast.makeText(this, "Gagal mengambil foto", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Set listener untuk tombol mengambil foto
+        buttonTakePhoto.setOnClickListener {
+            dispatchTakePictureIntent()
+        }
+
+        // Set listener untuk tombol menyimpan kendaraan
+        buttonSaveVehicle.setOnClickListener {
+            saveVehicle()
+        }
+
+        // Periksa dan minta izin
+        checkPermissions()
+    }
+
+    private fun hasCameraPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun hasStoragePermission(): Boolean {
+        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true // Tidak perlu izin untuk scoped storage di Android 10+
+        }
     }
 
     private fun checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA), REQUEST_PERMISSION_CAMERA)
+        val permissionsToRequest = mutableListOf<String>()
+
+        if (!hasCameraPermission()) {
+            permissionsToRequest.add(Manifest.permission.CAMERA)
         }
 
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_PERMISSION_STORAGE)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && !hasStoragePermission()) {
+            permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), REQUEST_PERMISSIONS)
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            REQUEST_PERMISSION_CAMERA -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Izin kamera diberikan
-                } else {
-                    // Tampilkan pesan bahwa izin dibutuhkan
-                }
-            }
-            REQUEST_PERMISSION_STORAGE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Izin penyimpanan diberikan
-                } else {
-                    // Tampilkan pesan bahwa izin dibutuhkan
-                }
-            }
-        }
-    }
     private fun dispatchTakePictureIntent() {
-        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        // Buat File tempat foto akan disimpan
+        val photoFile: File? = try {
+            createImageFile()
+        } catch (ex: IOException) {
+            // Tangani error saat membuat File
+            ex.printStackTrace()
+            null
+        }
 
-        // Pastikan ada aplikasi kamera yang dapat menangani intent
-        if (takePictureIntent.resolveActivity(packageManager) != null) {
-            try {
-                // Membuat file untuk menyimpan gambar
-                val photoFile = createImageFile()
-                photoUri = Uri.fromFile(photoFile) // Simpan URI foto
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri) // Kirim URI ke intent
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE) // Mulai activity kamera
-            } catch (ex: IOException) {
-                // Tangani error saat membuat file
-                ex.printStackTrace()
-            }
-        } else {
-            // Tampilkan pesan bahwa kamera tidak tersedia
+        // Lanjutkan hanya jika File berhasil dibuat
+        photoFile?.also {
+            photoUri = FileProvider.getUriForFile(
+                this,
+                "${applicationContext.packageName}.fileprovider",
+                it
+            )
+            takePictureLauncher.launch(photoUri)
+        } ?: run {
+            // Tampilkan pesan jika File gagal dibuat
+            Toast.makeText(this, "Tidak dapat membuat file gambar", Toast.LENGTH_SHORT).show()
         }
     }
-
 
     @Throws(IOException::class)
     private fun createImageFile(): File {
-        // Buat nama gambar dan file
+        // Buat nama file gambar dengan timestamp
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val timeStamp_ = ""
         return File.createTempFile(
-            "JPEG_$timeStamp_", /* prefix */
-            ".jpg",             /* suffix */
-            storageDir          /* directory */
-        ).apply {
-            // Simpan path ke file
-            photoUri = Uri.fromFile(this)
-        }
-    }
-
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            // Mengatur gambar ke ImageView
-            imageViewVehicle.setImageURI(photoUri)
-            imageViewVehicle.visibility = ImageView.VISIBLE
-        }
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg",              /* suffix */
+            storageDir           /* directory */
+        )
     }
 
     private fun saveVehicle() {
-        val plateNumber = editTextPlateNumber.text.toString()
-        // Simpan informasi kendaraan (nomor plat dan foto) sesuai kebutuhan
+        val plateNumber = editTextPlateNumber.text.toString().trim()
+        if (plateNumber.isEmpty()) {
+            Toast.makeText(this, "Nomor plat tidak boleh kosong", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (photoUri == null) {
+            Toast.makeText(this, "Silakan ambil foto kendaraan", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Persiapkan data untuk dikirim kembali ke MainActivity
+        val resultIntent = Intent().apply {
+            putExtra("plate_number", plateNumber)
+            putExtra("photo_uri", photoUri)
+        }
+        setResult(RESULT_OK, resultIntent)
+        finish()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            REQUEST_PERMISSIONS -> {
+                if (grantResults.isNotEmpty()) {
+                    var allGranted = true
+                    for (result in grantResults) {
+                        if (result != PackageManager.PERMISSION_GRANTED) {
+                            allGranted = false
+                            break
+                        }
+                    }
+                    if (!allGranted) {
+                        Toast.makeText(this, "Izin diperlukan untuk mengambil foto", Toast.LENGTH_SHORT).show()
+                        // Opsional: Nonaktifkan fungsi kamera
+                        buttonTakePhoto.isEnabled = false
+                        buttonSaveVehicle.isEnabled = false
+                    }
+                }
+            }
+            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
     }
 
     companion object {
-        private const val REQUEST_IMAGE_CAPTURE = 1
+        private const val REQUEST_PERMISSIONS = 1001
     }
 }

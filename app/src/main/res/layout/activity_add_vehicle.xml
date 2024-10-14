@@ -1,3 +1,4 @@
+<!-- res/layout/activity_add_vehicle.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,24 +9,25 @@
         android:id="@+id/edit_text_plate_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nomor Plat Kendaraan" />
-
-    <Button
-        android:id="@+id/button_take_photo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Ambil Foto" />
+        android:hint="Nomor Plat" />
 
     <ImageView
         android:id="@+id/image_view_vehicle"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:visibility="gone"
-        android:layout_marginTop="16dp" />
+        android:scaleType="centerCrop"
+        android:contentDescription="Gambar Kendaraan" />
+
+    <Button
+        android:id="@+id/btn_camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ambil Foto" />
 
     <Button
         android:id="@+id/button_save_vehicle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Simpan Kendaraan" />
+
 </LinearLayout>
