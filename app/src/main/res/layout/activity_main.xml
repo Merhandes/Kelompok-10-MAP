@@ -1,13 +1,28 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/button_add_vehicle"
+        android:id="@+id/btn_take_picture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tambah Kendaraan" />
+        android:text="Take a Picture"
+        android:layout_centerInParent="true"
+        />
 
-</LinearLayout>
+    <ImageView
+        android:layout_width="170dp"
+        android:layout_height="250dp"
+        android:src="@drawable/ic_launcher_background"
+        android:scaleType="fitXY"
+        android:layout_above="@id/btn_take_picture"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/img_view"
+        />
+
+</RelativeLayout>
