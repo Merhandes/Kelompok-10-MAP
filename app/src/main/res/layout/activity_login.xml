@@ -16,11 +16,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
+
     <Button
         android:id="@+id/btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/cerulean"
+        android:text="REGISTER"
+        app:cornerRadius="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="CLICK" />
+        tools:layout_editor_absoluteX="14dp" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
