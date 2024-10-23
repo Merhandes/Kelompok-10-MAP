@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/greetingText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="Good Luck Today"
+        android:textColor="#000"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/parkingSpotText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Parking Spot"
+        android:textSize="18sp"
+        android:textColor="#000"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_margin="20dp">
+
+        <Button
+            android:id="@+id/decrementButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="-"
+            android:background="@drawable/circle_button"
+            android:textColor="@android:color/black"
+            android:gravity="center"
+            android:textSize="24sp"
+            android:padding="0dp" />
+
+        <TextView
+            android:id="@+id/spotNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10"
+            android:textSize="30sp"
+            android:layout_margin="20dp"
+            android:gravity="center" />
+
+        <Button
+            android:id="@+id/incrementButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="+"
+            android:background="@drawable/circle_button"
+            android:textColor="@android:color/black"
+            android:gravity="center"
+            android:textSize="24sp"
+        android:padding="0dp" /> <!-- Pastikan padding tidak menyebabkan teks terpotong -->
+
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/viewParkingButton"
+        android:layout_width="311dp"
+        android:layout_height="60dp"
+        android:text="View Parking Spot"
+        android:backgroundTint="#008CBA"
+        android:textColor="#FFF"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/qrButton"
+        android:layout_width="311dp"
+        android:layout_height="60dp"
+        android:text="QR"
+        android:backgroundTint="#008CBA"
+        android:textColor="#FFF"/>
+
+</LinearLayout>
