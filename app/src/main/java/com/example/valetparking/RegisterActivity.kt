@@ -2,65 +2,44 @@ package com.example.valetparking
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.valetparking.LoginActivity
-import com.example.valetparking.R
-import com.example.valetparking.VerificationActivity
 import com.example.valetparking.databinding.ActivityRegisterBinding
 
 class RegisterActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityRegisterBinding
+    lateinit var binding: ActivityRegisterBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setting up window insets for edge-to-edge display
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        binding.btnNext.setOnClickListener {
+            val email = binding.emailET.text.toString().trim()
+            val pass = binding.passET.text.toString().trim()
+            val confirmPass = binding.confirmPassET.text.toString().trim()
 
-        // Handling the "Next" button in the SignUp process
-        binding.btnRegister.setOnClickListener {
-            validateAndProceedToOtp()
-        }
+            if (email.isEmpty()) {
+                binding.emailLayout.error = "Enter Email"
+            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                binding.emailLayout.error = "Enter a valid email address"
+            } else if (pass.isEmpty()) {
+                binding.passLayout.error = "Enter Password"
+            } else if (pass.length < 6) {
+                binding.passLayout.error = "Password must be at least 6 characters"
+            } else if (confirmPass.isEmpty()) {
+                binding.confirmPassLayout.error = "Enter Password Again"
+            } else if (pass != confirmPass) {
+                binding.confirmPassLayout.error = "Passwords must match"
+            } else {
+                // Clear any error messages before moving to the next screen
+                binding.emailLayout.error = null
+                binding.passLayout.error = null
+                binding.confirmPassLayout.error = null
 
-
-        // Login button leading to LoginActivity
-        binding.btnLogin.setOnClickListener {
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-        }
-    }
-
-    private fun validateAndProceedToOtp() {
-        val email = binding.textEmail.editText?.text.toString()
-        val password = binding.textPassword.editText?.text.toString()
-        val confirmPassword = binding.textConfirmationPassword.editText?.text.toString()
-        val phoneNumber = binding.textPhoneNumber.editText?.text.toString()
-
-        // Validation checks
-        when {
-            email.isEmpty() -> binding.textEmail.error = "Enter Email"
-            password.isEmpty() -> binding.textPassword.error = "Enter Password"
-            confirmPassword.isEmpty() -> binding.textConfirmationPassword.error = "Enter Password Again"
-            password != confirmPassword -> binding.textConfirmationPassword.error = "Passwords must match"
-            phoneNumber.isEmpty() -> binding.textPhoneNumber.error = "Enter Phone Number"
-            else -> {
-                // Proceed to OTP Activity
-                val intent = Intent(this, VerificationActivity::class.java)
+                // Proceed to verification activity
+                val intent = Intent(this@RegisterActivity, VerificationActivity::class.java)
                 intent.putExtra("email", email)
-                intent.putExtra("pass", password)
-                intent.putExtra("phone", phoneNumber)
+                intent.putExtra("pass", pass)
                 startActivity(intent)
             }
         }

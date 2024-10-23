@@ -60,3 +60,4 @@ dependencies {
     implementation("com.google.android.material:material:1.6.1")
     implementation ("com.github.1902shubh:SendMail:1.0.0")
 }
+
