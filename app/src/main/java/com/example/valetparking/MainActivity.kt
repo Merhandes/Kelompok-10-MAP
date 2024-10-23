@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 import android.widget.Button
 import android.widget.ImageView
 import androidx.core.app.ActivityCompat
+import com.google.firebase.FirebaseApp
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
