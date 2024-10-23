@@ -7,13 +7,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.valetparking.LoginActivity
-import com.example.valetparking.R
-import com.example.valetparking.VerificationActivity
 import com.example.valetparking.databinding.ActivityRegisterBinding
+import com.google.firebase.auth.FirebaseAuth
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,6 +20,9 @@ class RegisterActivity : AppCompatActivity() {
 
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Inisialisasi Firebase Authentication
+        auth = FirebaseAuth.getInstance()
 
         // Setting up window insets for edge-to-edge display
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -33,7 +35,6 @@ class RegisterActivity : AppCompatActivity() {
         binding.btnRegister.setOnClickListener {
             validateAndProceedToOtp()
         }
-
 
         // Login button leading to LoginActivity
         binding.btnLogin.setOnClickListener {
@@ -56,13 +57,28 @@ class RegisterActivity : AppCompatActivity() {
             password != confirmPassword -> binding.textConfirmationPassword.error = "Passwords must match"
             phoneNumber.isEmpty() -> binding.textPhoneNumber.error = "Enter Phone Number"
             else -> {
-                // Proceed to OTP Activity
-                val intent = Intent(this, VerificationActivity::class.java)
-                intent.putExtra("email", email)
-                intent.putExtra("pass", password)
-                intent.putExtra("phone", phoneNumber)
-                startActivity(intent)
+                // Registrasi pengguna menggunakan Firebase Authentication
+                registerUser(email, password, phoneNumber)
             }
         }
     }
+
+    // Fungsi untuk registrasi pengguna menggunakan Firebase Authentication
+    private fun registerUser(email: String, password: String, phoneNumber: String) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Jika pendaftaran berhasil, arahkan ke VerificationActivity
+                    val intent = Intent(this, VerificationActivity::class.java)
+                    intent.putExtra("email", email)
+                    intent.putExtra("phone", phoneNumber)
+                    startActivity(intent)
+                    Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Jika pendaftaran gagal, tampilkan pesan error
+                    Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+    }
 }
+
