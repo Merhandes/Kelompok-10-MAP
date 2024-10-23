@@ -1,5 +1,6 @@
 package com.example.valetparking
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -41,9 +42,9 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        // View Parking Spot button
-        viewParkingButton.setOnClickListener {
-            Toast.makeText(this, "Viewing Parking Spot: $parkingSpot", Toast.LENGTH_SHORT).show()
+        viewParkingButton.setOnClickListener{
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
 
         // QR button
