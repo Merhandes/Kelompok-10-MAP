@@ -13,15 +13,17 @@ class ParkingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_parking)
 
         // Set up buttons for each parking slot
-        val slot1: Button = findViewById(R.id.slot1)
-        val slot2: Button = findViewById(R.id.slot2)
-        val slot3: Button = findViewById(R.id.slot3)
-        val slot4: Button = findViewById(R.id.slot4)
-        val slot5: Button = findViewById(R.id.slot5)
-        val slot6: Button = findViewById(R.id.slot6)
-        val slot7: Button = findViewById(R.id.slot7)
-        val slot8: Button = findViewById(R.id.slot8)
-        val slot9: Button = findViewById(R.id.slot9)
+        val slot1: Button = findViewById(R.id.button_add_edit_1)
+        val slot2: Button = findViewById(R.id.button_add_edit_2)
+        val slot3: Button = findViewById(R.id.button_add_edit_3)
+        val slot4: Button = findViewById(R.id.button_add_edit_4)
+        val slot5: Button = findViewById(R.id.button_add_edit_5)
+        val slot6: Button = findViewById(R.id.button_add_edit_6)
+        val slot7: Button = findViewById(R.id.button_add_edit_7)
+        val slot8: Button = findViewById(R.id.button_add_edit_8)
+        val slot9: Button = findViewById(R.id.button_add_edit_9)
+        val slot10: Button = findViewById(R.id.button_add_edit_10)
+
 
         slot1.setOnClickListener {
             openAddEditActivity()
@@ -48,6 +50,9 @@ class ParkingActivity : AppCompatActivity() {
             openAddEditActivity()
         }
         slot9.setOnClickListener {
+            openAddEditActivity()
+        }
+        slot10.setOnClickListener {
             openAddEditActivity()
         }
 
