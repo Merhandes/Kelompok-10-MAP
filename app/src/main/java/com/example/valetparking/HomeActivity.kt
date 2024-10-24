@@ -43,7 +43,7 @@ class HomeActivity : AppCompatActivity() {
         }
 
         viewParkingButton.setOnClickListener{
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, SpotActivity::class.java)
             startActivity(intent)
         }
 

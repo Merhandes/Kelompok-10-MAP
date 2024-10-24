@@ -20,8 +20,16 @@
         android:theme="@style/Theme.ValetParking"
         tools:targetApi="31">
         <activity
+            android:name=".SpotActivity"
+            android:exported="false" />
+        <activity
             android:name=".HomeActivity"
-            android:exported="false">
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ForgotVerificationActivity"
@@ -52,13 +60,7 @@
             android:exported="false" />
         <activity
             android:name=".SplashActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false"></activity>
     </application>
 
 </manifest>
