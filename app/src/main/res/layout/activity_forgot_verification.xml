@@ -142,6 +142,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="28dp"
         android:layout_marginEnd="14dp"
+        android:background="@drawable/button_custom2"
         android:backgroundTint="@color/white"
         android:text="DONE"
         android:textColor="@color/cerulean"

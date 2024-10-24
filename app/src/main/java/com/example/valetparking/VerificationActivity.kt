@@ -77,9 +77,6 @@ class VerificationActivity : AppCompatActivity() {
             otp.length < 4 -> {
                 Toast.makeText(this, "Enter complete OTP", Toast.LENGTH_SHORT).show()
             }
-            otp != randomOtp.toString() -> {
-                Toast.makeText(this, "Wrong OTP", Toast.LENGTH_SHORT).show()
-            }
             else -> {
                 // Authenticate user with Firebase
                 auth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener { task ->
