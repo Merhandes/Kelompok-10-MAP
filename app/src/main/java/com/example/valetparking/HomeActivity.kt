@@ -49,7 +49,8 @@ class HomeActivity : AppCompatActivity() {
 
         // QR button
         qrButton.setOnClickListener {
-            Toast.makeText(this, "Generate QR for Spot: $parkingSpot", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, ImageQrActivity::class.java)
+            startActivity(intent)
         }
     }
 }
