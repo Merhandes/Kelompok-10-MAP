@@ -24,6 +24,18 @@
             android:exported="false">
         </activity>
         <activity
+            android:name=".ForgotVerificationActivity"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".SetNewPassActivity"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".ResetCompleteActivity"
+            android:exported="false">
+        </activity>
+        <activity
             android:name=".ForgotActivity"
             android:exported="false" />
         <activity
