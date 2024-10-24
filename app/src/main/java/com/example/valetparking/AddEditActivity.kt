@@ -67,7 +67,11 @@ class AddEditActivity : AppCompatActivity() {
 
         btnInsertPhoto.isEnabled = false
         // Check camera permission
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 100)
         } else {
             btnInsertPhoto.isEnabled = true
@@ -116,11 +120,22 @@ class AddEditActivity : AppCompatActivity() {
             val photo: Bitmap? = data?.getParcelableExtra("data")
             imgView.setImageBitmap(photo)
             // Convert bitmap to Uri for Firebase Storage
-            selectedImageUri = Uri.parse(MediaStore.Images.Media.insertImage(contentResolver, photo, "Title", null))
+            selectedImageUri = Uri.parse(
+                MediaStore.Images.Media.insertImage(
+                    contentResolver,
+                    photo,
+                    "Title",
+                    null
+                )
+            )
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 100 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             btnInsertPhoto.isEnabled = true
@@ -134,7 +149,8 @@ class AddEditActivity : AppCompatActivity() {
         val carColor = color.text.toString().trim()
 
         if (plate.isEmpty() || carColor.isEmpty() || selectedImageUri == null) {
-            Toast.makeText(this, "Please fill all fields and select an image", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please fill all fields and select an image", Toast.LENGTH_SHORT)
+                .show()
             return
         }
 
@@ -161,10 +177,15 @@ class AddEditActivity : AppCompatActivity() {
                         updateFilledStatus()
                     }
                     .addOnFailureListener { e ->
-                        Toast.makeText(this, "Failed to save car details: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "Failed to save car details: ${e.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
             }.addOnFailureListener { e ->
-                Toast.makeText(this, "Failed to get image URL: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Failed to get image URL: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
             }
         }.addOnFailureListener { e ->
             Toast.makeText(this, "Failed to upload image: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -176,12 +197,25 @@ class AddEditActivity : AppCompatActivity() {
             firestore.collection("parkingSpots").document(parkingSpotId!!)
                 .update("filled", true)
                 .addOnSuccessListener {
-                    Toast.makeText(this, "Parking spot updated to filled!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Parking spot updated to filled!", Toast.LENGTH_SHORT)
+                        .show()
+
+                    // Set the result to indicate success and the new filled status
+                    val resultIntent = Intent().apply {
+                        putExtra("IS_FILLED", true) // Pass back the filled status
+                        putExtra("PARKING_SPOT_ID", parkingSpotId) // Optional: pass the spot ID
+                    }
+                    setResult(RESULT_OK, resultIntent)
                     finish() // Close the activity
                 }
                 .addOnFailureListener {
-                    Toast.makeText(this, "Failed to update parking spot filled status", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Failed to update parking spot filled status",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
         }
     }
 }
+

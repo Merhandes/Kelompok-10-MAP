@@ -1,11 +1,11 @@
 package com.example.valetparking
 
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +15,8 @@ class SpotActivity : AppCompatActivity() {
     private var isFilled: Boolean = false // Track if the spot is filled
     private lateinit var firestore: FirebaseFirestore
     private lateinit var parkingSpotId: String // ID of the parking spot document
+
+    private val ADD_EDIT_REQUEST_CODE = 1 // Request code for AddEditActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,24 +32,27 @@ class SpotActivity : AppCompatActivity() {
         val editText1: TextView = findViewById(R.id.etEdit1)
         val incrementButton1: Button = findViewById(R.id.incrementButton1)
 
+        // Set up listeners
         btnBack.setOnClickListener {
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, HomeActivity::class.java))
         }
 
         btnEdit1.setOnClickListener {
-            val intent = Intent(this, AddEditActivity::class.java)
-            startActivity(intent)
+            // Launch AddEditActivity
+            startActivityForResult(Intent(this, AddEditActivity::class.java).apply {
+                putExtra("PARKING_SPOT_ID", parkingSpotId) // Pass the parking spot ID if needed
+            }, ADD_EDIT_REQUEST_CODE)
         }
 
         incrementButton1.setOnClickListener {
             if (isFilled) {
-                // If already filled, we want to set it to false and hide the elements
+                // If already filled, update to not filled
                 updateParkingSpot(false)
             } else {
-                // If not filled, we want to go to AddEditActivity
-                val addEditIntent = Intent(this, AddEditActivity::class.java)
-                startActivity(addEditIntent)
+                // If not filled, go to AddEditActivity
+                startActivityForResult(Intent(this, AddEditActivity::class.java).apply {
+                    putExtra("PARKING_SPOT_ID", parkingSpotId) // Pass the parking spot ID
+                }, ADD_EDIT_REQUEST_CODE)
             }
         }
 
@@ -61,7 +66,6 @@ class SpotActivity : AppCompatActivity() {
             .limit(1) // Get only one
             .get()
             .addOnSuccessListener { documents ->
-                // Check if the documents collection is not empty
                 if (documents.size() > 0) {
                     // Get the first unfilled parking spot
                     val document = documents.documents[0]
@@ -70,7 +74,7 @@ class SpotActivity : AppCompatActivity() {
                     updateViewVisibility() // Update UI based on filled state
                 } else {
                     Toast.makeText(this, "No unfilled parking spots available", Toast.LENGTH_SHORT).show()
-                    isFilled = false // No spots available, treat as unfilled
+                    isFilled = false // Treat as unfilled if no spots available
                     updateViewVisibility() // Update UI accordingly
                 }
             }
@@ -98,13 +102,25 @@ class SpotActivity : AppCompatActivity() {
         val incrementButton1: Button = findViewById(R.id.incrementButton1)
 
         if (isFilled) {
-            carImage1.visibility = View.VISIBLE
-            editText1.visibility = View.VISIBLE
+            carImage1.visibility = View.VISIBLE // Show the car image
+            editText1.visibility = View.VISIBLE // Show the edit text
             incrementButton1.text = "-" // Change button text to "-"
         } else {
-            carImage1.visibility = View.GONE
-            editText1.visibility = View.GONE
+            carImage1.visibility = View.GONE // Hide the car image
+            editText1.visibility = View.GONE // Hide the edit text
             incrementButton1.text = "+" // Change button text to "+"
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == ADD_EDIT_REQUEST_CODE && resultCode == RESULT_OK) {
+            // Check if the data has the filled status
+            val isFilledFromResult = data?.getBooleanExtra("IS_FILLED", false) ?: false
+            if (isFilledFromResult) {
+                isFilled = true // Update the local filled status
+                updateViewVisibility() // Update UI
+            }
         }
     }
 }
