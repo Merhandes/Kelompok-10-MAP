@@ -63,7 +63,7 @@
             android:background="@drawable/border"
             android:gravity="center"
             android:padding="15dp"
-            android:text="10"
+            android:text=""
             android:textSize="30sp" />
 
         <Button
