@@ -5,10 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
 class HomeActivity : AppCompatActivity() {
     private var parkingSpot = 10
@@ -42,8 +39,9 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        viewParkingButton.setOnClickListener{
-            val intent = Intent(this, MainActivity::class.java)
+        // Navigate to ParkingActivity when viewParkingButton is clicked
+        viewParkingButton.setOnClickListener {
+            val intent = Intent(this, ParkingActivity::class.java)
             startActivity(intent)
         }
 

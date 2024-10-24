@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#333333">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/title_add_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ADD/EDIT"
+        android:textSize="24sp"
+        android:textColor="#FFFFFF" />
+
+    <!-- Plate Number Field -->
+    <EditText
+        android:id="@+id/et_plate_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Plate Number"
+        android:textSize="18sp"
+        android:layout_marginTop="16dp" />
+
+    <!-- Color Field -->
+    <EditText
+        android:id="@+id/et_color"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Car Color"
+        android:textSize="18sp"
+        android:layout_marginTop="16dp" />
+
+    <!-- Insert Photo Button -->
+    <Button
+        android:id="@+id/btn_insert_photo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Insert Photo"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/tv_date_time_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="08/10/2024 - 21:04"
+        android:textSize="16sp"
+        android:minHeight="48dp"
+        android:textColor="#FFFFFF"
+        android:layout_gravity="center" />
+</LinearLayout>
