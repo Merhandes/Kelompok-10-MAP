@@ -5,19 +5,24 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.View
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
 class SpotActivity : AppCompatActivity() {
-
+    private lateinit var firestore: FirebaseFirestore
     private lateinit var dateTimeTextView: TextView
+    private var parkingSpotId: String = "" // Initialize parking spot ID
+    private var isFilled: Boolean = false // Track if the spot is filled
     private val handler = Handler(Looper.getMainLooper())
+    private val ADD_EDIT_REQUEST_CODE = 1 // Define request code for AddEditActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,15 +38,15 @@ class SpotActivity : AppCompatActivity() {
         val editText1: TextView = findViewById(R.id.etEdit1)
         val incrementButton1: Button = findViewById(R.id.incrementButton1)
 
-        // Inisialisasi TextView
+        // Initialize TextView for real-time update
         dateTimeTextView = findViewById(R.id.tv_date_time_edit)
 
-        // Memulai pembaruan waktu secara real-time
+        // Start real-time date and time update
         startRealTimeUpdate()
 
-        btnBack.setOnClickListener{
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
+        // Set up listeners
+        btnBack.setOnClickListener {
+            startActivity(Intent(this, HomeActivity::class.java))
         }
 
         btnEdit1.setOnClickListener {
@@ -118,26 +123,26 @@ class SpotActivity : AppCompatActivity() {
             incrementButton1.text = "+" // Change button text to "+"
         }
     }
+
     private fun startRealTimeUpdate() {
         val runnable = object : Runnable {
             override fun run() {
-                // Format waktu sesuai kebutuhan
+                // Format time as needed
                 val currentTime = Calendar.getInstance().time
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy - HH:mm:ss", Locale.getDefault())
                 val formattedTime = dateFormat.format(currentTime)
 
-                // Set waktu ke TextView
+                // Set time to TextView
                 dateTimeTextView.text = formattedTime
 
-                // Memperbarui TextView setiap 1 detik
+                // Update TextView every second
                 handler.postDelayed(this, 1000)
             }
         }
 
-        // Memulai pembaruan pertama kali
+        // Start the first update
         handler.post(runnable)
     }
-}
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -150,3 +155,4 @@ class SpotActivity : AppCompatActivity() {
             }
         }
     }
+}
