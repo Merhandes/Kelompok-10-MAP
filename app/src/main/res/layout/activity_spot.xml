@@ -585,20 +585,14 @@
         app:layout_constraintStart_toStartOf="parent"
         android:gravity="center"
         android:layout_gravity="center">
+
         <TextView
-            android:id="@+id/dateText"
+            android:id="@+id/tv_date_time_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="08/10/2024"
+            android:text="08/10/2024 - 21:04"
             android:textSize="16sp"
             android:gravity="center" />
-        <TextView
-            android:id="@+id/timeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:gravity="center"
-            android:text="21:04"
-            android:textSize="16sp" />
-        </LinearLayout>
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
