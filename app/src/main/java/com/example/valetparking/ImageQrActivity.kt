@@ -17,9 +17,9 @@ class ImageQrActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(com.example.myapplication.R.layout.activity_main)
+        setContentView(com.example.valetparking.R.layout.activity_image_qr)
 
-        val uploadButton = findViewById<Button>(com.example.myapplication.R.id.uploadButton)
+        val uploadButton = findViewById<Button>(com.example.valetparking.R.id.uploadButton)
         uploadButton.setOnClickListener {
             val intent = Intent(
                 Intent.ACTION_PICK,
@@ -28,7 +28,7 @@ class ImageQrActivity : AppCompatActivity() {
             startActivityForResult(intent, 3)
         }
 
-        currentTimeTextView = findViewById(com.example.myapplication.R.id.currentTime)
+        currentTimeTextView = findViewById(com.example.valetparking.R.id.currentTime)
         updateCurrentTime()
     }
 
@@ -37,11 +37,11 @@ class ImageQrActivity : AppCompatActivity() {
 
         if (requestCode == 3 && resultCode == RESULT_OK && data != null) {
             val selectedImage: Uri? = data.data
-            val imageView = findViewById<ImageView>(com.example.myapplication.R.id.imageView)
+            val imageView = findViewById<ImageView>(com.example.valetparking.R.id.imageView)
             imageView.setImageURI(selectedImage)
 
             // Hide the button after the image is uploaded
-            val uploadButton = findViewById<Button>(com.example.myapplication.R.id.uploadButton)
+            val uploadButton = findViewById<Button>(com.example.valetparking.R.id.uploadButton)
             uploadButton.visibility = View.GONE
         }
     }
