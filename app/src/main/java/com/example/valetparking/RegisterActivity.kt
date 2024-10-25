@@ -78,7 +78,6 @@ class RegisterActivity : AppCompatActivity() {
 
                     // Create a user data map
                     val userData = hashMapOf(
-                        "email" to email,
                         "phone" to phoneNumber
                     )
 
@@ -89,7 +88,6 @@ class RegisterActivity : AppCompatActivity() {
                             .addOnSuccessListener {
                                 // If Firestore write is successful, navigate to VerificationActivity
                                 val intent = Intent(this, VerificationActivity::class.java)
-                                intent.putExtra("email", email)
                                 intent.putExtra("phone", phoneNumber)
                                 startActivity(intent)
                                 Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
