@@ -9,10 +9,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.valetparking.databinding.ActivityRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var auth: FirebaseAuth
+    private lateinit var firestore: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,8 +23,9 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Inisialisasi Firebase Authentication
+        // Initialize Firebase Authentication and Firestore
         auth = FirebaseAuth.getInstance()
+        firestore = FirebaseFirestore.getInstance()
 
         // Setting up window insets for edge-to-edge display
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -56,29 +59,49 @@ class RegisterActivity : AppCompatActivity() {
             confirmPassword.isEmpty() -> binding.textConfirmationPassword.error = "Enter Password Again"
             password != confirmPassword -> binding.textConfirmationPassword.error = "Passwords must match"
             phoneNumber.isEmpty() -> binding.textPhoneNumber.error = "Enter Phone Number"
+            phoneNumber.length != 12 -> binding.textPhoneNumber.error = "Phone Number must be 12 digits"
+            phoneNumber.any { !it.isDigit() } -> binding.textPhoneNumber.error = "Phone Number must contain only digits"
             else -> {
-                // Registrasi pengguna menggunakan Firebase Authentication
+                // User registration using Firebase Authentication
                 registerUser(email, password, phoneNumber)
             }
         }
     }
 
-    // Fungsi untuk registrasi pengguna menggunakan Firebase Authentication
     private fun registerUser(email: String, password: String, phoneNumber: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Jika pendaftaran berhasil, arahkan ke VerificationActivity
-                    val intent = Intent(this, VerificationActivity::class.java)
-                    intent.putExtra("email", email)
-                    intent.putExtra("phone", phoneNumber)
-                    startActivity(intent)
-                    Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
+                    // User registration was successful, store additional data in Firestore
+                    val user = auth.currentUser // Get the current user
+                    val userId = user?.uid // Get the user ID
+
+                    // Create a user data map
+                    val userData = hashMapOf(
+                        "email" to email,
+                        "phone" to phoneNumber
+                    )
+
+                    // Store user data in Firestore
+                    userId?.let {
+                        firestore.collection("users").document(it)
+                            .set(userData)
+                            .addOnSuccessListener {
+                                // If Firestore write is successful, navigate to VerificationActivity
+                                val intent = Intent(this, VerificationActivity::class.java)
+                                intent.putExtra("email", email)
+                                intent.putExtra("phone", phoneNumber)
+                                startActivity(intent)
+                                Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show()
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "Failed to save user data: ${e.message}", Toast.LENGTH_LONG).show()
+                            }
+                    }
                 } else {
-                    // Jika pendaftaran gagal, tampilkan pesan error
+                    // If registration failed, display error message
                     Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }
 }
-
