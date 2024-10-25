@@ -26,22 +26,34 @@ class LoginActivity : AppCompatActivity() {
         val etPassword = findViewById<EditText>(R.id.etPassword)
 
         btnLogin.setOnClickListener {
-            val email = etEmail.text.toString()
-            val password = etPassword.text.toString()
+            val email = etEmail.text.toString().trim() // Trim whitespace
+            val password = etPassword.text.toString().trim() // Trim whitespace
 
+            if (email.isEmpty()) {
+                Toast.makeText(this, "Please enter your email.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (password.isEmpty()) {
+                Toast.makeText(this, "Please enter your password.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Proceed to sign in if email and password are valid
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
-                        // Login sukses, pindah ke halaman utama
+                        // Login successful, navigate to HomeActivity
                         val intent = Intent(this, HomeActivity::class.java)
                         startActivity(intent)
                         finish()
                     } else {
-                        // Gagal login
-                        Toast.makeText(this, "Login gagal: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        // Failed to log in
+                        Toast.makeText(this, "Login failed: Email atau Password Salah", Toast.LENGTH_SHORT).show()
                     }
                 }
         }
+
 
         btnSignup.setOnClickListener{
             val intent = Intent(this, RegisterActivity::class.java)
