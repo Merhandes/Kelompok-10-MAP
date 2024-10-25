@@ -71,25 +71,18 @@ class VerificationActivity : AppCompatActivity() {
         val otp = "${inputCode1.text}${inputCode2.text}${inputCode3.text}${inputCode4.text}"
 
         when {
-            otp.isEmpty() -> {
-                Toast.makeText(this, "Enter complete OTP", Toast.LENGTH_SHORT).show()
-            }
-            otp.length < 4 -> {
+            otp.isEmpty() || otp.length < 4 -> {
                 Toast.makeText(this, "Enter complete OTP", Toast.LENGTH_SHORT).show()
             }
             else -> {
-                // Authenticate user with Firebase
-                auth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        startActivity(Intent(this, LoginActivity::class.java)) // Redirect to LoginActivity
-                        finish() // Optionally, close the current activity
-                    } else {
-                        Toast.makeText(this, task.exception?.message.toString(), Toast.LENGTH_SHORT).show()
-                    }
-                }
+                // This block is reached when the OTP has 4 digits regardless of its value.
+                // Instead of creating a new user, you might want to redirect directly to LoginActivity.
+                startActivity(Intent(this, LoginActivity::class.java)) // Redirect to LoginActivity
+                finish()
             }
         }
     }
+
 
     private fun setupOTPInputs(vararg inputs: EditText) {
         for (i in inputs.indices) {
