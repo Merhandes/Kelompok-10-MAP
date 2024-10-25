@@ -10,10 +10,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import java.util.*
 
 class ImageQrActivity : AppCompatActivity() {
     private lateinit var currentTimeTextView: TextView
+    private val storage = FirebaseStorage.getInstance()
+    private val db = FirebaseFirestore.getInstance()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,23 +39,36 @@ class ImageQrActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == 3 && resultCode == RESULT_OK && data != null) {
             val selectedImage: Uri? = data.data
-            val imageView = findViewById<ImageView>(com.example.valetparking.R.id.imageView)
+            val imageView = findViewById<ImageView>(R.id.imageView)
             imageView.setImageURI(selectedImage)
+            findViewById<Button>(R.id.uploadButton).visibility = View.GONE
 
-            // Hide the button after the image is uploaded
-            val uploadButton = findViewById<Button>(com.example.valetparking.R.id.uploadButton)
-            uploadButton.visibility = View.GONE
+            selectedImage?.let { uri ->
+                val storageRef = storage.reference.child("images/${UUID.randomUUID()}.jpg")
+                storageRef.putFile(uri).addOnSuccessListener {
+                    storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                        saveImageUrlToFirestore(downloadUrl.toString())
+                    }
+                }.addOnFailureListener {
+                }
+            }
         }
     }
+
+    private fun saveImageUrlToFirestore(url: String) {
+        val imageInfo = hashMapOf("imageUrl" to url, "timestamp" to System.currentTimeMillis())
+        db.collection("uploads").add(imageInfo).addOnSuccessListener {
+        }.addOnFailureListener {
+        }
+    }
+
 
     private fun updateCurrentTime() {
         val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
         currentTimeTextView.text = currentTime
 
-        // Update the time every second
         currentTimeTextView.postDelayed({ updateCurrentTime() }, 1000)
     }
 }
