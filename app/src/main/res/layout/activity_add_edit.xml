@@ -3,17 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="16dp"
-    android:background="#333333">
+    android:padding="16dp">
 
     <!-- Title -->
     <TextView
         android:id="@+id/title_add_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ADD/EDIT"
-        android:textSize="24sp"
-        android:textColor="#FFFFFF"
+        android:text="Add/Edit"
+        android:textSize="20sp"
+        android:textColor="@color/black"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -50,27 +49,31 @@
     <!-- Insert Photo Button -->
     <Button
         android:id="@+id/btn_insert_photo"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="Insert Photo"
+        android:hint="Insert Photo"
+        android:textSize="18sp"
+        android:padding="12dp"
+        android:background="@drawable/border_background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_color" />
 
     <!-- ImageView to Display Photo -->
+
+    <!-- Date and Time -->
     <ImageView
         android:id="@+id/img_view"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="28dp"
         android:background="@drawable/border_background"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_insert_photo" />
 
-    <!-- Date and Time -->
     <TextView
         android:id="@+id/tv_date_time_edit"
         android:layout_width="wrap_content"
@@ -86,10 +89,12 @@
 
     <Button
         android:id="@+id/btn_save"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="190dp"
+        android:layout_height="51dp"
         android:layout_marginTop="24dp"
+        android:background="@drawable/button_custom1"
         android:text="Save"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_date_time_edit" />
