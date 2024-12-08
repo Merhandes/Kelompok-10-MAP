@@ -22,7 +22,7 @@
         android:id="@+id/parkingSpotText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="152dp"
+        android:layout_marginTop="72dp"
         android:text="Parking Spot"
         android:textColor="#000"
         android:textSize="18sp"
@@ -32,11 +32,12 @@
         app:layout_constraintTop_toBottomOf="@+id/greetingText" />
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/viewParkingButton"
+        app:layout_constraintBottom_toTopOf="@+id/qrButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
@@ -79,29 +80,16 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/viewParkingButton"
-        android:layout_width="311dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="240dp"
-        android:background="@drawable/button_custom1"
-        android:text="View Parking Spot"
-        android:textColor="@color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/parkingSpotText" />
-
-    <Button
         android:id="@+id/qrButton"
         android:layout_width="311dp"
         android:layout_height="60dp"
-        android:layout_marginTop="20dp"
         android:background="@drawable/button_custom1"
         android:text="QR"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/viewParkingButton"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:layout_constraintVertical_bias="0.323" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -34,7 +34,7 @@ class RegisterActivity : AppCompatActivity() {
             insets
         }
 
-        // Handling the "Next" button in the SignUp process
+        // Handling the "Register" button click
         binding.btnRegister.setOnClickListener {
             validateAndProceedToOtp()
         }
@@ -47,6 +47,8 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun validateAndProceedToOtp() {
+        // Capture user input
+        val name = binding.textName.editText?.text.toString()  // Get name from TextInputLayout
         val email = binding.textEmail.editText?.text.toString()
         val password = binding.textPassword.editText?.text.toString()
         val confirmPassword = binding.textConfirmationPassword.editText?.text.toString()
@@ -54,6 +56,7 @@ class RegisterActivity : AppCompatActivity() {
 
         // Validation checks
         when {
+            name.isEmpty() -> binding.textName.error = "Enter Name"
             email.isEmpty() -> binding.textEmail.error = "Enter Email"
             password.isEmpty() -> binding.textPassword.error = "Enter Password"
             confirmPassword.isEmpty() -> binding.textConfirmationPassword.error = "Enter Password Again"
@@ -62,13 +65,13 @@ class RegisterActivity : AppCompatActivity() {
             phoneNumber.length != 12 -> binding.textPhoneNumber.error = "Phone Number must be 12 digits"
             phoneNumber.any { !it.isDigit() } -> binding.textPhoneNumber.error = "Phone Number must contain only digits"
             else -> {
-                // User registration using Firebase Authentication
-                registerUser(email, password, phoneNumber)
+                // Proceed with Firebase authentication and Firestore data storage
+                registerUser(name, email, password, phoneNumber)
             }
         }
     }
 
-    private fun registerUser(email: String, password: String, phoneNumber: String) {
+    private fun registerUser(name: String, email: String, password: String, phoneNumber: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
@@ -76,9 +79,10 @@ class RegisterActivity : AppCompatActivity() {
                     val user = auth.currentUser // Get the current user
                     val userId = user?.uid // Get the user ID
 
-                    // Create a user data map
+                    // Create a user data map (including name)
                     val userData = hashMapOf(
-                        "phone" to phoneNumber
+                        "phone" to phoneNumber,
+                        "name" to name  // Add name to Firestore data
                     )
 
                     // Store user data in Firestore

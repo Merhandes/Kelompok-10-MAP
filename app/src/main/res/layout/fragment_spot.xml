@@ -19,18 +19,6 @@
         tools:layout_editor_absoluteX="152dp"
         tools:layout_editor_absoluteY="116dp" />
 
-    <TextView
-        android:id="@+id/btnBack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Back"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.948"
-        app:layout_constraintStart_toEndOf="@+id/parkingTitle"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/parkingLayout"
         android:layout_width="359dp"
@@ -108,7 +96,7 @@
             </LinearLayout>
 
 
-    <!-- Baris 1 Kolom 2 -->
+            <!-- Baris 1 Kolom 2 -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"

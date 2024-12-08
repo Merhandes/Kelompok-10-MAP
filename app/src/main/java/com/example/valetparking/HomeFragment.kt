@@ -2,29 +2,36 @@ package com.example.valetparking
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 
-class HomeActivity : AppCompatActivity() {
+class HomeFragment : Fragment() {
+
     private var parkingSpot = 0
     private lateinit var firestore: FirebaseFirestore
     private lateinit var listenerRegistration: ListenerRegistration
     private lateinit var spotNumberText: TextView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        val rootView = inflater.inflate(R.layout.fragment_home, container, false)
 
         // Initialize UI elements
-        spotNumberText = findViewById(R.id.spotNumber)
-        val decrementButton: Button = findViewById(R.id.decrementButton)
-        val incrementButton: Button = findViewById(R.id.incrementButton)
-        val viewParkingButton: Button = findViewById(R.id.viewParkingButton)
-        val qrButton: Button = findViewById(R.id.qrButton)
+        spotNumberText = rootView.findViewById(R.id.spotNumber)
+        val decrementButton: Button = rootView.findViewById(R.id.decrementButton)
+        val incrementButton: Button = rootView.findViewById(R.id.incrementButton)
+        val qrButton: Button = rootView.findViewById(R.id.qrButton)
 
         // Initialize Firestore
         firestore = FirebaseFirestore.getInstance()
@@ -42,16 +49,13 @@ class HomeActivity : AppCompatActivity() {
             removeParkingSpot()
         }
 
-        viewParkingButton.setOnClickListener {
-            val intent = Intent(this, SpotActivity::class.java)
+        // QR button
+        qrButton.setOnClickListener {
+            val intent = Intent(requireContext(), ImageQrActivity::class.java)
             startActivity(intent)
         }
 
-        // QR button
-        qrButton.setOnClickListener {
-            val intent = Intent(this, ImageQrActivity::class.java)
-            startActivity(intent)
-        }
+        return rootView
     }
 
     private fun loadAvailableSpots() {
@@ -60,7 +64,7 @@ class HomeActivity : AppCompatActivity() {
             .whereEqualTo("filled", false)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Toast.makeText(this@HomeActivity, "Failed to load spots", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Failed to load spots", Toast.LENGTH_SHORT).show()
                     return@addSnapshotListener
                 }
 
@@ -86,7 +90,7 @@ class HomeActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { snapshot ->
                 if (snapshot.size() >= 10) {
-                    Toast.makeText(this, "Max number of parking spots reached!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Max number of parking spots reached!", Toast.LENGTH_SHORT).show()
                 } else {
                     // Create a new parking spot with "filled" set to false if the limit is not exceeded
                     val newSpotData = hashMapOf("filled" to false)
@@ -94,15 +98,15 @@ class HomeActivity : AppCompatActivity() {
                         .add(newSpotData)
                         .addOnSuccessListener { documentReference ->
                             updateSpotNumber()
-                            Toast.makeText(this, "New parking spot created with ID: ${documentReference.id}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "New parking spot created with ID: ${documentReference.id}", Toast.LENGTH_SHORT).show()
                         }
                         .addOnFailureListener { e ->
-                            Toast.makeText(this, "Failed to create parking spot: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "Failed to create parking spot: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error checking parking spots: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Error checking parking spots: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -118,7 +122,7 @@ class HomeActivity : AppCompatActivity() {
                     // No unfilled spots available to delete
                     parkingSpot = 0 // Update parking spot count to 0
                     updateSpotNumber() // Update the UI to reflect no spots
-                    Toast.makeText(this, "No spots available to delete", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "No spots available to delete", Toast.LENGTH_SHORT).show()
                 } else {
                     // Get the last unfilled parking spot
                     val document = documents.documents[0]
@@ -128,15 +132,15 @@ class HomeActivity : AppCompatActivity() {
                             parkingSpot-- // Decrement the local counter
                             if (parkingSpot < 0) parkingSpot = 0 // Ensure it doesn't go below 0
                             updateSpotNumber() // Update the displayed spot count
-                            Toast.makeText(this, "Parking spot deleted!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "Parking spot deleted!", Toast.LENGTH_SHORT).show()
                         }
                         .addOnFailureListener {
-                            Toast.makeText(this, "Failed to delete parking spot", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(requireContext(), "Failed to delete parking spot", Toast.LENGTH_SHORT).show()
                         }
                 }
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Failed to load unfilled spots", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Failed to load unfilled spots", Toast.LENGTH_SHORT).show()
             }
     }
 
