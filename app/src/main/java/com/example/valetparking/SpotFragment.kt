@@ -5,18 +5,22 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class SpotActivity : AppCompatActivity() {
+class SpotFragment : Fragment() {
+
     private lateinit var firestore: FirebaseFirestore
     private lateinit var dateTimeTextView: TextView
     private var parkingSpotId: String = "" // Initialize parking spot ID
@@ -24,36 +28,36 @@ class SpotActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private val ADD_EDIT_REQUEST_CODE = 1 // Define request code for AddEditActivity
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_spot)
+    // Initialize UI elements in onCreateView instead of onCreate
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the fragment's layout
+        val view = inflater.inflate(R.layout.fragment_spot, container, false)
 
         // Initialize Firestore
         firestore = FirebaseFirestore.getInstance()
 
         // Initialize UI elements
-        val btnBack: TextView = findViewById(R.id.btnBack)
-        val btnEdit1: TextView = findViewById(R.id.etEdit1)
-        val carImage1: ImageView = findViewById(R.id.carImage1)
-        val editText1: TextView = findViewById(R.id.etEdit1)
-        val incrementButton1: Button = findViewById(R.id.incrementButton1)
+        val btnEdit1: TextView = view.findViewById(R.id.etEdit1)
+        val carImage1: ImageView = view.findViewById(R.id.carImage1)
+        val editText1: TextView = view.findViewById(R.id.etEdit1)
+        val incrementButton1: Button = view.findViewById(R.id.incrementButton1)
 
         // Initialize TextView for real-time update
-        dateTimeTextView = findViewById(R.id.tv_date_time_edit)
+        dateTimeTextView = view.findViewById(R.id.tv_date_time_edit)
 
         // Start real-time date and time update
         startRealTimeUpdate()
 
-        // Set up listeners
-        btnBack.setOnClickListener {
-            startActivity(Intent(this, HomeActivity::class.java))
-        }
-
         btnEdit1.setOnClickListener {
             // Launch AddEditActivity
-            startActivityForResult(Intent(this, AddEditActivity::class.java).apply {
-                putExtra("PARKING_SPOT_ID", parkingSpotId) // Pass the parking spot ID if needed
-            }, ADD_EDIT_REQUEST_CODE)
+            activity?.let {
+                startActivityForResult(Intent(it, AddEditActivity::class.java).apply {
+                    putExtra("PARKING_SPOT_ID", parkingSpotId) // Pass the parking spot ID if needed
+                }, ADD_EDIT_REQUEST_CODE)
+            }
         }
 
         incrementButton1.setOnClickListener {
@@ -62,14 +66,18 @@ class SpotActivity : AppCompatActivity() {
                 updateParkingSpot(false)
             } else {
                 // If not filled, go to AddEditActivity
-                startActivityForResult(Intent(this, AddEditActivity::class.java).apply {
-                    putExtra("PARKING_SPOT_ID", parkingSpotId) // Pass the parking spot ID
-                }, ADD_EDIT_REQUEST_CODE)
+                activity?.let {
+                    startActivityForResult(Intent(it, AddEditActivity::class.java).apply {
+                        putExtra("PARKING_SPOT_ID", parkingSpotId) // Pass the parking spot ID
+                    }, ADD_EDIT_REQUEST_CODE)
+                }
             }
         }
 
         // Load the first unfilled parking spot from Firestore
         loadFirstUnfilledParkingSpot()
+
+        return view
     }
 
     private fun loadFirstUnfilledParkingSpot() {
@@ -85,13 +93,13 @@ class SpotActivity : AppCompatActivity() {
                     isFilled = document.getBoolean("filled") ?: false // Update filled status
                     updateViewVisibility() // Update UI based on filled state
                 } else {
-                    Toast.makeText(this, "No unfilled parking spots available", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "No unfilled parking spots available", Toast.LENGTH_SHORT).show()
                     isFilled = false // Treat as unfilled if no spots available
                     updateViewVisibility() // Update UI accordingly
                 }
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Failed to load parking spots", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Failed to load parking spots", Toast.LENGTH_SHORT).show()
             }
     }
 
@@ -101,17 +109,19 @@ class SpotActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 isFilled = filled // Update local filled state
                 updateViewVisibility() // Update the UI accordingly
-                Toast.makeText(this, "Parking spot updated!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Parking spot updated!", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Failed to update parking spot", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Failed to update parking spot", Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun updateViewVisibility() {
-        val carImage1: ImageView = findViewById(R.id.carImage1)
-        val editText1: TextView = findViewById(R.id.etEdit1)
-        val incrementButton1: Button = findViewById(R.id.incrementButton1)
+        // UI elements inside the fragment's layout
+        val view = view ?: return
+        val carImage1: ImageView = view.findViewById(R.id.carImage1)
+        val editText1: TextView = view.findViewById(R.id.etEdit1)
+        val incrementButton1: Button = view.findViewById(R.id.incrementButton1)
 
         if (isFilled) {
             carImage1.visibility = View.VISIBLE // Show the car image
@@ -144,6 +154,7 @@ class SpotActivity : AppCompatActivity() {
         handler.post(runnable)
     }
 
+    // Handle the result from AddEditActivity
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == ADD_EDIT_REQUEST_CODE && resultCode == RESULT_OK) {

@@ -5,10 +5,10 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
 
     <application
         android:allowBackup="true"
@@ -21,27 +21,29 @@
         android:theme="@style/Theme.ValetParking"
         tools:targetApi="31">
         <activity
+            android:name=".HomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UpdateProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+        <activity
             android:name=".ImageQrActivity"
             android:exported="false" />
         <activity
             android:name=".SpotActivity"
             android:exported="false" />
         <activity
-            android:name=".HomeActivity"
-            android:exported="false">
-        </activity>
-        <activity
             android:name=".ForgotVerificationActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".SetNewPassActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".ResetCompleteActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".ForgotActivity"
             android:exported="false" />
@@ -55,10 +57,9 @@
             android:name=".LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".CameraActivity"
             android:exported="false" />
-
-        <activity android:name=".AddEditActivity"/>
+        <activity android:name=".AddEditActivity" />
         <activity
             android:name=".SplashActivity"
             android:exported="true">
@@ -69,4 +70,5 @@
             </intent-filter>
         </activity>
     </application>
+
 </manifest>
