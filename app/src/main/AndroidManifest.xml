@@ -24,9 +24,6 @@
         android:theme="@style/Theme.ValetParking"
         tools:targetApi="31">
         <activity
-            android:name=".HomeActivity"
-            android:exported="false" />
-        <activity
             android:name=".UpdateProfileActivity"
             android:exported="false" />
         <activity
@@ -34,9 +31,6 @@
             android:exported="false" />
         <activity
             android:name=".ImageQrActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SpotActivity"
             android:exported="false" />
         <activity
             android:name=".ForgotVerificationActivity"
@@ -58,9 +52,6 @@
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CameraActivity"
             android:exported="false" />
         <activity android:name=".AddEditActivity" />
         <activity
