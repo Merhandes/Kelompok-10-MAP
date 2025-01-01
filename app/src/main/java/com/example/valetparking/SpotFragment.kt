@@ -60,16 +60,30 @@ class SpotFragment : Fragment() {
             }
         }
 
-        incrementButton1.setOnClickListener {
-            if (isFilled) {
-                // If already filled, update to not filled
-                updateParkingSpot(false)
-            } else {
-                // If not filled, go to AddEditActivity
+        // Array of button IDs
+        val buttonIds = listOf(
+            R.id.incrementButton1,
+            R.id.incrementButton2,
+            R.id.incrementButton3,
+            R.id.incrementButton4,
+            R.id.incrementButton5,
+            R.id.incrementButton6,
+            R.id.incrementButton7,
+            R.id.incrementButton8,
+            R.id.incrementButton9,
+            R.id.incrementButton10
+        )
+
+        // Loop through each button ID and set OnClickListener
+        for ((index, buttonId) in buttonIds.withIndex()) {
+            val button = view.findViewById<Button>(buttonId)
+            button.setOnClickListener {
+                // Launch AddEditActivity with the specific parking spot ID
                 activity?.let {
-                    startActivityForResult(Intent(it, AddEditActivity::class.java).apply {
-                        putExtra("PARKING_SPOT_ID", parkingSpotId) // Pass the parking spot ID
-                    }, ADD_EDIT_REQUEST_CODE)
+                    val intent = Intent(it, AddEditActivity::class.java).apply {
+                        putExtra("PARKING_SPOT_ID", "spot_$index") // Pass unique ID for each spot
+                    }
+                    startActivityForResult(intent, ADD_EDIT_REQUEST_CODE)
                 }
             }
         }
