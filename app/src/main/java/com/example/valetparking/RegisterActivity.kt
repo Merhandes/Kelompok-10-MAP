@@ -2,6 +2,7 @@ package com.example.valetparking
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.valetparking.databinding.ActivityRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.hbb20.CountryCodePicker
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
@@ -26,6 +28,9 @@ class RegisterActivity : AppCompatActivity() {
         // Initialize Firebase Authentication and Firestore
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
+
+        // Setup CountryCodePicker
+        binding.countryCodePicker.registerCarrierNumberEditText(binding.textPhoneNumber.editText)
 
         // Setting up window insets for edge-to-edge display
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -48,11 +53,11 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun validateAndProceedToOtp() {
         // Capture user input
-        val name = binding.textName.editText?.text.toString()  // Get name from TextInputLayout
+        val name = binding.textName.editText?.text.toString()
         val email = binding.textEmail.editText?.text.toString()
         val password = binding.textPassword.editText?.text.toString()
         val confirmPassword = binding.textConfirmationPassword.editText?.text.toString()
-        val phoneNumber = binding.textPhoneNumber.editText?.text.toString()
+        val phoneNumber = binding.countryCodePicker.fullNumberWithPlus // Use country code picker
 
         // Validation checks
         when {
@@ -62,8 +67,7 @@ class RegisterActivity : AppCompatActivity() {
             confirmPassword.isEmpty() -> binding.textConfirmationPassword.error = "Enter Password Again"
             password != confirmPassword -> binding.textConfirmationPassword.error = "Passwords must match"
             phoneNumber.isEmpty() -> binding.textPhoneNumber.error = "Enter Phone Number"
-            phoneNumber.length != 12 -> binding.textPhoneNumber.error = "Phone Number must be 12 digits"
-            phoneNumber.any { !it.isDigit() } -> binding.textPhoneNumber.error = "Phone Number must contain only digits"
+            phoneNumber.length < 10 -> binding.textPhoneNumber.error = "Phone Number must be valid"
             else -> {
                 // Proceed with Firebase authentication and Firestore data storage
                 registerUser(name, email, password, phoneNumber)
@@ -76,13 +80,13 @@ class RegisterActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // User registration was successful, store additional data in Firestore
-                    val user = auth.currentUser // Get the current user
-                    val userId = user?.uid // Get the user ID
+                    val user = auth.currentUser
+                    val userId = user?.uid
 
                     // Create a user data map (including name)
                     val userData = hashMapOf(
                         "phone" to phoneNumber,
-                        "name" to name  // Add name to Firestore data
+                        "name" to name
                     )
 
                     // Store user data in Firestore
@@ -90,7 +94,6 @@ class RegisterActivity : AppCompatActivity() {
                         firestore.collection("users").document(it)
                             .set(userData)
                             .addOnSuccessListener {
-                                // If Firestore write is successful, navigate to VerificationActivity
                                 val intent = Intent(this, VerificationActivity::class.java)
                                 intent.putExtra("phone", phoneNumber)
                                 startActivity(intent)
@@ -101,7 +104,6 @@ class RegisterActivity : AppCompatActivity() {
                             }
                     }
                 } else {
-                    // If registration failed, display error message
                     Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }

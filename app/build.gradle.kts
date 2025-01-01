@@ -70,6 +70,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation ("com.github.1902shubh:SendMail:1.0.0")
+    implementation ("com.hbb20:ccp:2.5.0")
 
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.0")
