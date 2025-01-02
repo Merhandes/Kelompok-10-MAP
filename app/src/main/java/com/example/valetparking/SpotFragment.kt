@@ -52,6 +52,19 @@ class SpotFragment : Fragment() {
         updateAvailableSpots()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        // Check if we need to clear a spot
+        val clearSpotId = activity?.intent?.getStringExtra("clear_spot_id")?.toIntOrNull()
+        if (clearSpotId != null && filledSpots.contains(clearSpotId)) {
+            filledSpots.remove(clearSpotId)
+            saveFilledSpotsToFirestore() // Save updated state to Firestore
+            updateParkingLayout(sharedViewModel.parkingSpot.value ?: 0) // Refresh UI
+        }
+    }
+
+
     private fun createParkingSpotView(spotNumber: Int): TextView {
         val textView = TextView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
@@ -65,20 +78,9 @@ class SpotFragment : Fragment() {
             gravity = android.view.Gravity.CENTER
 
             setOnClickListener {
-                if (filledSpots.contains(spotNumber)) {
-                    val intent = Intent(requireContext(), AddEditActivity::class.java)
-                    intent.putExtra("spotNumber", spotNumber)
-                    startActivity(intent)
-                } else {
-                    filledSpots.add(spotNumber)
-                    setBackgroundResource(R.color.green)
-                    updateAvailableSpots()
-                    saveFilledSpotsToFirestore()
-
-                    val intent = Intent(requireContext(), AddEditActivity::class.java)
-                    intent.putExtra("spotNumber", spotNumber)
-                    startActivity(intent)
-                }
+                val intent = Intent(requireContext(), AddEditActivity::class.java)
+                intent.putExtra("PARKING_SPOT_ID", spotNumber.toString()) // Pass correct key/value
+                startActivity(intent)
             }
         }
 

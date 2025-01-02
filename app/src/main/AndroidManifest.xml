@@ -45,6 +45,12 @@
             android:name=".ForgotActivity"
             android:exported="false" />
         <activity
+            android:name=".ReceiptActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CameraActivity"
+            android:exported="false" />
+        <activity
             android:name=".VerificationActivity"
             android:exported="false" />
         <activity
