@@ -52,7 +52,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:hint="Insert Photo"
+        android:text="Insert Photo"
         android:textSize="18sp"
         android:padding="12dp"
         android:background="@drawable/border_background"
@@ -61,8 +61,6 @@
         app:layout_constraintTop_toBottomOf="@+id/et_color" />
 
     <!-- ImageView to Display Photo -->
-
-    <!-- Date and Time -->
     <ImageView
         android:id="@+id/img_view"
         android:layout_width="200dp"
@@ -74,30 +72,61 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_insert_photo" />
 
+    <!-- Date and Time -->
     <TextView
         android:id="@+id/tv_date_time_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="252dp"
-        android:minHeight="48dp"
+        android:layout_marginTop="12dp"
         android:text="08/10/2024 - 21:04"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_insert_photo" />
+        app:layout_constraintTop_toBottomOf="@+id/img_view" />
 
-    <Button
-        android:id="@+id/btn_save"
-        android:layout_width="190dp"
-        android:layout_height="51dp"
+    <!-- Horizontal LinearLayout for Buttons -->
+    <LinearLayout
+        android:id="@+id/btn_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_marginTop="24dp"
-        android:background="@drawable/button_custom1"
-        android:text="Save"
-        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_date_time_edit" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_date_time_edit">
 
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_custom1"
+            android:text="Save"
+            android:textColor="@color/white" />
+
+        <!-- Delete Button -->
+        <Button
+            android:id="@+id/btn_delete"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_custom1"
+            android:text="Delete"
+            android:textColor="@color/white" />
+
+        <!-- Pay Button -->
+        <Button
+            android:id="@+id/btn_pay"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/button_custom1"
+            android:text="Pay"
+            android:textColor="@color/white" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

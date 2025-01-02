@@ -1,183 +1,101 @@
 package com.example.valetparking
 
-import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.google.firebase.firestore.FirebaseFirestore
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import androidx.lifecycle.ViewModelProvider
 
 class SpotFragment : Fragment() {
 
-    private lateinit var firestore: FirebaseFirestore
-    private lateinit var dateTimeTextView: TextView
-    private var parkingSpotId: String = "" // Initialize parking spot ID
-    private var isFilled: Boolean = false // Track if the spot is filled
-    private val handler = Handler(Looper.getMainLooper())
-    private val ADD_EDIT_REQUEST_CODE = 1 // Define request code for AddEditActivity
+    private lateinit var sharedViewModel: SharedViewModel
+    private lateinit var parkingLayout: LinearLayout
+    private lateinit var spotCountTextView: TextView
+    private val filledSpots = mutableSetOf<Int>() // Keep track of filled spots
 
-    // Initialize UI elements in onCreateView instead of onCreate
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the fragment's layout
         val view = inflater.inflate(R.layout.fragment_spot, container, false)
 
-        // Initialize Firestore
-        firestore = FirebaseFirestore.getInstance()
+        sharedViewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
+        parkingLayout = view.findViewById(R.id.parkingLayout)
+        spotCountTextView = view.findViewById(R.id.spotCount)
 
-        // Initialize UI elements
-        val btnEdit1: TextView = view.findViewById(R.id.etEdit1)
-        val carImage1: ImageView = view.findViewById(R.id.carImage1)
-        val editText1: TextView = view.findViewById(R.id.etEdit1)
-        val incrementButton1: Button = view.findViewById(R.id.incrementButton1)
-
-        // Initialize TextView for real-time update
-        dateTimeTextView = view.findViewById(R.id.tv_date_time_edit)
-
-        // Start real-time date and time update
-        startRealTimeUpdate()
-
-        btnEdit1.setOnClickListener {
-            // Launch AddEditActivity
-            activity?.let {
-                startActivityForResult(Intent(it, AddEditActivity::class.java).apply {
-                    putExtra("PARKING_SPOT_ID", parkingSpotId) // Pass the parking spot ID if needed
-                }, ADD_EDIT_REQUEST_CODE)
-            }
-        }
-
-        // Array of button IDs
-        val buttonIds = listOf(
-            R.id.incrementButton1,
-            R.id.incrementButton2,
-            R.id.incrementButton3,
-            R.id.incrementButton4,
-            R.id.incrementButton5,
-            R.id.incrementButton6,
-            R.id.incrementButton7,
-            R.id.incrementButton8,
-            R.id.incrementButton9,
-            R.id.incrementButton10
-        )
-
-        // Loop through each button ID and set OnClickListener
-        for ((index, buttonId) in buttonIds.withIndex()) {
-            val button = view.findViewById<Button>(buttonId)
-            button.setOnClickListener {
-                // Launch AddEditActivity with the specific parking spot ID
-                activity?.let {
-                    val intent = Intent(it, AddEditActivity::class.java).apply {
-                        putExtra("PARKING_SPOT_ID", "spot_$index") // Pass unique ID for each spot
-                    }
-                    startActivityForResult(intent, ADD_EDIT_REQUEST_CODE)
-                }
-            }
-        }
-
-        // Load the first unfilled parking spot from Firestore
-        loadFirstUnfilledParkingSpot()
+        // Observe the parking spot count
+        sharedViewModel.parkingSpot.observe(viewLifecycleOwner, { count ->
+            updateParkingLayout(count)
+        })
 
         return view
     }
 
-    private fun loadFirstUnfilledParkingSpot() {
-        firestore.collection("parkingSpots")
-            .whereEqualTo("filled", false) // Find unfilled spots
-            .limit(1) // Get only one
-            .get()
-            .addOnSuccessListener { documents ->
-                if (documents.size() > 0) {
-                    // Get the first unfilled parking spot
-                    val document = documents.documents[0]
-                    parkingSpotId = document.id // Save the document ID
-                    isFilled = document.getBoolean("filled") ?: false // Update filled status
-                    updateViewVisibility() // Update UI based on filled state
+    /**
+     * Updates the parking layout dynamically based on the parking spot count.
+     */
+    private fun updateParkingLayout(spotCount: Int) {
+        // Clear existing views
+        parkingLayout.removeAllViews()
+
+        // Add TextViews dynamically for each parking spot
+        for (i in 1..spotCount) {
+            val spotView = createParkingSpotView(i)
+            parkingLayout.addView(spotView)
+        }
+
+        // Update available spots count
+        updateAvailableSpots()
+    }
+
+    /**
+     * Creates a TextView for a parking spot.
+     */
+    private fun createParkingSpotView(spotNumber: Int): TextView {
+        val textView = TextView(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 16, 0, 0) // Add margin between spots
+            }
+            text = "Spot $spotNumber"
+            textSize = 18f
+            setPadding(16, 16, 16, 16)
+            setBackgroundResource(if (filledSpots.contains(spotNumber)) R.color.green else R.color.red)
+            gravity = android.view.Gravity.CENTER
+
+            // Click listener to navigate to AddEditActivity
+            setOnClickListener {
+                if (filledSpots.contains(spotNumber)) {
+                    Toast.makeText(context, "Spot $spotNumber is already filled!", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(requireContext(), "No unfilled parking spots available", Toast.LENGTH_SHORT).show()
-                    isFilled = false // Treat as unfilled if no spots available
-                    updateViewVisibility() // Update UI accordingly
+                    filledSpots.add(spotNumber) // Mark the spot as filled
+                    setBackgroundResource(R.color.green) // Update color
+                    updateAvailableSpots() // Recalculate available spots
+
+                    // Navigate to AddEditActivity
+                    val intent = Intent(requireContext(), AddEditActivity::class.java)
+                    intent.putExtra("spotNumber", spotNumber)
+                    startActivity(intent)
                 }
             }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to load parking spots", Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun updateParkingSpot(filled: Boolean) {
-        firestore.collection("parkingSpots").document(parkingSpotId)
-            .update("filled", filled)
-            .addOnSuccessListener {
-                isFilled = filled // Update local filled state
-                updateViewVisibility() // Update the UI accordingly
-                Toast.makeText(requireContext(), "Parking spot updated!", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to update parking spot", Toast.LENGTH_SHORT).show()
-            }
-    }
-
-    private fun updateViewVisibility() {
-        // UI elements inside the fragment's layout
-        val view = view ?: return
-        val carImage1: ImageView = view.findViewById(R.id.carImage1)
-        val editText1: TextView = view.findViewById(R.id.etEdit1)
-        val incrementButton1: Button = view.findViewById(R.id.incrementButton1)
-
-        if (isFilled) {
-            carImage1.visibility = View.VISIBLE // Show the car image
-            editText1.visibility = View.VISIBLE // Show the edit text
-            incrementButton1.text = "-" // Change button text to "-"
-        } else {
-            carImage1.visibility = View.GONE // Hide the car image
-            editText1.visibility = View.GONE // Hide the edit text
-            incrementButton1.text = "+" // Change button text to "+"
-        }
-    }
-
-    private fun startRealTimeUpdate() {
-        val runnable = object : Runnable {
-            override fun run() {
-                // Format time as needed
-                val currentTime = Calendar.getInstance().time
-                val dateFormat = SimpleDateFormat("dd/MM/yyyy - HH:mm:ss", Locale.getDefault())
-                val formattedTime = dateFormat.format(currentTime)
-
-                // Set time to TextView
-                dateTimeTextView.text = formattedTime
-
-                // Update TextView every second
-                handler.postDelayed(this, 1000)
-            }
         }
 
-        // Start the first update
-        handler.post(runnable)
+        return textView
     }
 
-    // Handle the result from AddEditActivity
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == ADD_EDIT_REQUEST_CODE && resultCode == RESULT_OK) {
-            // Check if the data has the filled status
-            val isFilledFromResult = data?.getBooleanExtra("IS_FILLED", false) ?: false
-            if (isFilledFromResult) {
-                isFilled = true // Update the local filled status
-                updateViewVisibility() // Update UI
-            }
-        }
+    /**
+     * Updates the available spots count dynamically.
+     */
+    private fun updateAvailableSpots() {
+        val totalSpots = sharedViewModel.parkingSpot.value ?: 0
+        val availableSpots = totalSpots - filledSpots.size
+        spotCountTextView.text = availableSpots.toString()
     }
 }

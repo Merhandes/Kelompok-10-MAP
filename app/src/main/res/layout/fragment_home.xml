@@ -49,9 +49,7 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:background="@drawable/circle_button"
-            android:backgroundTint="@color/black"
             android:gravity="center"
-            android:padding="0dp"
             android:text="-"
             android:textColor="@color/black"
             android:textSize="12sp" />
@@ -64,7 +62,7 @@
             android:background="@drawable/border"
             android:gravity="center"
             android:padding="15dp"
-            android:text=""
+            android:text="0"
             android:textSize="30sp" />
 
         <Button
@@ -73,7 +71,6 @@
             android:layout_height="25dp"
             android:background="@drawable/circle_button"
             android:gravity="center"
-            android:padding="0dp"
             android:text="+"
             android:textColor="@color/black"
             android:textSize="12sp" />
@@ -91,5 +88,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"
         app:layout_constraintVertical_bias="0.323" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
