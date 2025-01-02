@@ -10,8 +10,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 class SpotFragment : Fragment() {
 
@@ -29,9 +27,6 @@ class SpotFragment : Fragment() {
         sharedViewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         parkingLayout = view.findViewById(R.id.parkingLayout)
         spotCountTextView = view.findViewById(R.id.spotCount)
-
-        // Load filled spots from Firestore
-        loadFilledSpotsFromFirestore()
 
         // Observe parking spot count
         sharedViewModel.parkingSpot.observe(viewLifecycleOwner) { count ->
@@ -52,19 +47,6 @@ class SpotFragment : Fragment() {
         updateAvailableSpots()
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        // Check if we need to clear a spot
-        val clearSpotId = activity?.intent?.getStringExtra("clear_spot_id")?.toIntOrNull()
-        if (clearSpotId != null && filledSpots.contains(clearSpotId)) {
-            filledSpots.remove(clearSpotId)
-            saveFilledSpotsToFirestore() // Save updated state to Firestore
-            updateParkingLayout(sharedViewModel.parkingSpot.value ?: 0) // Refresh UI
-        }
-    }
-
-
     private fun createParkingSpotView(spotNumber: Int): TextView {
         val textView = TextView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(
@@ -78,9 +60,19 @@ class SpotFragment : Fragment() {
             gravity = android.view.Gravity.CENTER
 
             setOnClickListener {
-                val intent = Intent(requireContext(), AddEditActivity::class.java)
-                intent.putExtra("PARKING_SPOT_ID", spotNumber.toString()) // Pass correct key/value
-                startActivity(intent)
+                if (filledSpots.contains(spotNumber)) {
+                    // Spot is already filled, allow clearing
+                    removeSpot(spotNumber)
+                } else {
+                    // Fill the spot and navigate
+                    filledSpots.add(spotNumber)
+                    setBackgroundResource(R.color.green)
+                    updateAvailableSpots()
+
+                    val intent = Intent(requireContext(), AddEditActivity::class.java)
+                    intent.putExtra("spotNumber", spotNumber)
+                    startActivity(intent)
+                }
             }
         }
 
@@ -93,42 +85,9 @@ class SpotFragment : Fragment() {
         spotCountTextView.text = availableSpots.toString()
     }
 
-    private fun saveFilledSpotsToFirestore() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
-        if (userId != null) {
-            val db = FirebaseFirestore.getInstance()
-            val userDoc = db.collection("users").document(userId)
-
-            userDoc.update("filledSpots", filledSpots.toList())
-                .addOnSuccessListener {
-                    Toast.makeText(requireContext(), "Filled spots saved!", Toast.LENGTH_SHORT).show()
-                }
-                .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Failed to save filled spots.", Toast.LENGTH_SHORT).show()
-                }
-        }
-    }
-
-    private fun loadFilledSpotsFromFirestore() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
-        if (userId != null) {
-            val db = FirebaseFirestore.getInstance()
-            val userDoc = db.collection("users").document(userId)
-
-            userDoc.get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val spots = document.get("filledSpots") as? List<Long>
-                        if (spots != null) {
-                            filledSpots.clear()
-                            filledSpots.addAll(spots.map { it.toInt() })
-                            updateParkingLayout(sharedViewModel.parkingSpot.value ?: 0)
-                        }
-                    }
-                }
-                .addOnFailureListener {
-                    Toast.makeText(requireContext(), "Failed to load filled spots.", Toast.LENGTH_SHORT).show()
-                }
-        }
+    private fun removeSpot(spotNumber: Int) {
+        filledSpots.remove(spotNumber)
+        updateParkingLayout(sharedViewModel.parkingSpot.value ?: 0)
+        Toast.makeText(requireContext(), "Spot $spotNumber cleared.", Toast.LENGTH_SHORT).show()
     }
 }

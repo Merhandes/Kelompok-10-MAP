@@ -202,48 +202,40 @@ class AddEditActivity : AppCompatActivity() {
         val carColor = color.text.toString().trim()
 
         if (plate.isEmpty() || carColor.isEmpty() || selectedImageUri == null) {
-            Toast.makeText(this, "Please fill all fields and select an image", Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(this, "Please fill all fields and select an image", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Save image to Firebase Storage
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Upload image to Firebase Storage
         val filePath = storageReference.child("car_images/${System.currentTimeMillis()}.jpg")
         filePath.putFile(selectedImageUri!!).addOnSuccessListener {
-            // Get download URL
             filePath.downloadUrl.addOnSuccessListener { downloadUri ->
                 val carData = hashMapOf(
                     "plate_number" to plate,
                     "color" to carColor,
                     "image_url" to downloadUri.toString(),
-                    "timestamp" to System.currentTimeMillis()
+                    "timestamp" to System.currentTimeMillis(),
+                    "userId" to userId // Save userId reference
                 )
 
-                if (parkingSpotId != null) {
-                    firestore.collection("parkingSpots").document(parkingSpotId!!)
-                        .set(carData)
-                        .addOnSuccessListener {
-                            Toast.makeText(this, "Car details updated!", Toast.LENGTH_SHORT).show()
-                            setResult(RESULT_OK)
-                            finish()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "Failed to update car details: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
-                } else {
-                    firestore.collection("parkingSpots").add(carData)
-                        .addOnSuccessListener { documentReference ->
-                            Toast.makeText(this, "Car details saved!", Toast.LENGTH_SHORT).show()
-                            setResult(RESULT_OK)
-                            finish()
-                        }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "Failed to save car details: ${e.message}", Toast.LENGTH_SHORT).show()
-                        }
-                }
-            }.addOnFailureListener { e ->
-                Toast.makeText(this, "Failed to upload image: ${e.message}", Toast.LENGTH_SHORT).show()
+                firestore.collection("parkingSpots").add(carData)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Car details saved!", Toast.LENGTH_SHORT).show()
+                        setResult(RESULT_OK)
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Failed to save car details: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
     }
+
 }
+
