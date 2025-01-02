@@ -68,10 +68,11 @@ class UpdateProfileFragment : Fragment() {
 
         val user = auth.currentUser
         if (user != null) {
-            val userProfile = UserProfile(name)
+            // Menggunakan update untuk hanya mengubah field "name"
+            val updates = mapOf("name" to name)
 
             db.collection("users").document(user.uid)
-                .set(userProfile)
+                .update(updates)
                 .addOnSuccessListener {
                     Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show()
 
