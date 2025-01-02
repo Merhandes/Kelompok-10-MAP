@@ -89,7 +89,10 @@ class AddEditActivity : AppCompatActivity() {
 
         // Delete button click listener
         btnDelete.setOnClickListener {
+            val intent = Intent(this, ImageQrActivity::class.java)
+            startActivity(intent)
         }
+
 
         // Retrieve spot data from intent
         parkingSpotId = intent.getStringExtra("PARKING_SPOT_ID")
@@ -118,6 +121,21 @@ class AddEditActivity : AppCompatActivity() {
 
         // Start the first update
         handler.post(runnable)
+    }
+
+    private fun deleteCarFromFirebase(spotNumber: Int) {
+        val db = FirebaseFirestore.getInstance()
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            val carDoc = db.collection("users").document(userId)
+                .collection("cars").document(spotNumber.toString())
+
+            carDoc.delete().addOnSuccessListener {
+                Toast.makeText(this, "Car removed!", Toast.LENGTH_SHORT).show()
+            }.addOnFailureListener {
+                Toast.makeText(this, "Failed to remove car.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -164,7 +182,7 @@ class AddEditActivity : AppCompatActivity() {
                     val carColor = document.getString("color") ?: ""
                     val imageUrl = document.getString("image_url")
 
-                    // Pre-fill the data into the fields
+                    // Pre-fill the form fields with retrieved data
                     plateNumber.setText(plate)
                     color.setText(carColor)
 
@@ -202,7 +220,6 @@ class AddEditActivity : AppCompatActivity() {
                 )
 
                 if (parkingSpotId != null) {
-                    // Update the existing parking spot
                     firestore.collection("parkingSpots").document(parkingSpotId!!)
                         .set(carData)
                         .addOnSuccessListener {
@@ -214,9 +231,8 @@ class AddEditActivity : AppCompatActivity() {
                             Toast.makeText(this, "Failed to update car details: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                 } else {
-                    // Save as new entry
                     firestore.collection("parkingSpots").add(carData)
-                        .addOnSuccessListener {
+                        .addOnSuccessListener { documentReference ->
                             Toast.makeText(this, "Car details saved!", Toast.LENGTH_SHORT).show()
                             setResult(RESULT_OK)
                             finish()

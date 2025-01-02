@@ -1,69 +1,67 @@
 package com.example.valetparking
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import java.util.*
+import android.graphics.Bitmap
+import com.google.zxing.BarcodeFormat
+import com.journeyapps.barcodescanner.BarcodeEncoder
 
 class ImageQrActivity : AppCompatActivity() {
     private lateinit var currentTimeTextView: TextView
-    private val storage = FirebaseStorage.getInstance()
-    private val db = FirebaseFirestore.getInstance()
-
+    private lateinit var qrImageView: ImageView
+    private var parkingSpotId: String = "SPOT_1234"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(com.example.valetparking.R.layout.activity_image_qr)
+        setContentView(R.layout.activity_image_qr)
 
-        val uploadButton = findViewById<Button>(com.example.valetparking.R.id.uploadButton)
-        uploadButton.setOnClickListener {
-            val intent = Intent(
-                Intent.ACTION_PICK,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            )
-            startActivityForResult(intent, 3)
+        currentTimeTextView = findViewById(R.id.currentTime)
+        qrImageView = findViewById(R.id.imageView)
+        val generateButton = findViewById<Button>(R.id.generateQRButton)
+        val doneButton = findViewById<Button>(R.id.doneButton)
+
+        generateButton.text = "Generate QR"
+        generateButton.setOnClickListener {
+            generateRandomQr()
         }
 
-        currentTimeTextView = findViewById(com.example.valetparking.R.id.currentTime)
+        doneButton.setOnClickListener {
+            navigateToReceiptPage()
+        }
+
         updateCurrentTime()
+
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 3 && resultCode == RESULT_OK && data != null) {
-            val selectedImage: Uri? = data.data
-            val imageView = findViewById<ImageView>(R.id.imageView)
-            imageView.setImageURI(selectedImage)
-            findViewById<Button>(R.id.uploadButton).visibility = View.GONE
 
-            selectedImage?.let { uri ->
-                val storageRef = storage.reference.child("images/${UUID.randomUUID()}.jpg")
-                storageRef.putFile(uri).addOnSuccessListener {
-                    storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                        saveImageUrlToFirestore(downloadUrl.toString())
-                    }
-                }.addOnFailureListener {
-                }
-            }
+    private fun generateRandomQr() {
+        val randomData = UUID.randomUUID().toString()
+        try {
+            val barcodeEncoder = BarcodeEncoder()
+            val bitmap: Bitmap = barcodeEncoder.encodeBitmap(randomData, BarcodeFormat.QR_CODE, 400, 400)
+            qrImageView.setImageBitmap(bitmap)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+
         }
+
     }
 
-    private fun saveImageUrlToFirestore(url: String) {
-        val imageInfo = hashMapOf("imageUrl" to url, "timestamp" to System.currentTimeMillis())
-        db.collection("uploads").add(imageInfo).addOnSuccessListener {
-        }.addOnFailureListener {
-        }
-    }
 
+
+    private fun navigateToReceiptPage() {
+        val intent = Intent(this, ReceiptActivity::class.java)
+        intent.putExtra("paymentTime", currentTimeTextView.text.toString())
+        intent.putExtra("PARKING_SPOT_ID", parkingSpotId)
+        startActivity(intent)
+    }
 
     private fun updateCurrentTime() {
         val currentTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
