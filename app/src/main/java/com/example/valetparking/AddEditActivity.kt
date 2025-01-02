@@ -1,6 +1,5 @@
 package com.example.valetparking
 
-import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -9,7 +8,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -18,9 +16,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -33,15 +33,15 @@ class AddEditActivity : AppCompatActivity() {
     private lateinit var dateTimeTextView: TextView
     private lateinit var btnInsertPhoto: Button
     private lateinit var imgView: ImageView
-    private lateinit var btnSave: Button // Declare btnSave here
+    private lateinit var btnSave: Button
+    private lateinit var btnDelete: Button
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
     private lateinit var storageReference: StorageReference
-    private var selectedImageUri: Uri? = null // To hold the selected image URI
+    private var selectedImageUri: Uri? = null
     private var parkingSpotId: String? = null // To hold the parking spot ID
 
-    // Declare handler here
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,7 +57,8 @@ class AddEditActivity : AppCompatActivity() {
         color = findViewById(R.id.et_color)
         btnInsertPhoto = findViewById(R.id.btn_insert_photo)
         imgView = findViewById(R.id.img_view)
-        btnSave = findViewById(R.id.btn_save) // Initialize btnSave
+        btnSave = findViewById(R.id.btn_save)
+        btnDelete = findViewById(R.id.btn_delete)
 
         // Initialize TextView
         dateTimeTextView = findViewById(R.id.tv_date_time_edit)
@@ -82,9 +83,20 @@ class AddEditActivity : AppCompatActivity() {
             startActivityForResult(intent, 101)
         }
 
-        // Save button click listener
-        btnSave.setOnClickListener { // Use the initialized btnSave
+        btnSave.setOnClickListener {
             saveCarDetails()
+        }
+
+        // Delete button click listener
+        btnDelete.setOnClickListener {
+        }
+
+        // Retrieve spot data from intent
+        parkingSpotId = intent.getStringExtra("PARKING_SPOT_ID")
+
+        // If editing an existing spot, load the data from Firestore
+        if (parkingSpotId != null) {
+            loadExistingSpotData(parkingSpotId!!)
         }
     }
 
@@ -144,6 +156,29 @@ class AddEditActivity : AppCompatActivity() {
         }
     }
 
+    private fun loadExistingSpotData(spotId: String) {
+        firestore.collection("parkingSpots").document(spotId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val plate = document.getString("plate_number") ?: ""
+                    val carColor = document.getString("color") ?: ""
+                    val imageUrl = document.getString("image_url")
+
+                    // Pre-fill the data into the fields
+                    plateNumber.setText(plate)
+                    color.setText(carColor)
+
+                    // Load the image if available
+                    if (!imageUrl.isNullOrEmpty()) {
+                        Picasso.get().load(imageUrl).into(imgView)
+                    }
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Failed to load parking spot data", Toast.LENGTH_SHORT).show()
+            }
+    }
+
     private fun saveCarDetails() {
         val plate = plateNumber.text.toString().trim()
         val carColor = color.text.toString().trim()
@@ -159,7 +194,6 @@ class AddEditActivity : AppCompatActivity() {
         filePath.putFile(selectedImageUri!!).addOnSuccessListener {
             // Get download URL
             filePath.downloadUrl.addOnSuccessListener { downloadUri ->
-                // Save car details to Firestore
                 val carData = hashMapOf(
                     "plate_number" to plate,
                     "color" to carColor,
@@ -167,55 +201,33 @@ class AddEditActivity : AppCompatActivity() {
                     "timestamp" to System.currentTimeMillis()
                 )
 
-                // Save to the cars collection first
-                firestore.collection("parkingSpots").add(carData)
-                    .addOnSuccessListener { documentReference ->
-                        // Save the parking spot ID
-                        parkingSpotId = documentReference.id
-
-                        // Update the filled status in Firestore
-                        updateFilledStatus()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(
-                            this,
-                            "Failed to save car details: ${e.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                if (parkingSpotId != null) {
+                    // Update the existing parking spot
+                    firestore.collection("parkingSpots").document(parkingSpotId!!)
+                        .set(carData)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Car details updated!", Toast.LENGTH_SHORT).show()
+                            setResult(RESULT_OK)
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Failed to update car details: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    // Save as new entry
+                    firestore.collection("parkingSpots").add(carData)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Car details saved!", Toast.LENGTH_SHORT).show()
+                            setResult(RESULT_OK)
+                            finish()
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Failed to save car details: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }.addOnFailureListener { e ->
-                Toast.makeText(this, "Failed to get image URL: ${e.message}", Toast.LENGTH_SHORT)
-                    .show()
+                Toast.makeText(this, "Failed to upload image: ${e.message}", Toast.LENGTH_SHORT).show()
             }
-        }.addOnFailureListener { e ->
-            Toast.makeText(this, "Failed to upload image: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun updateFilledStatus() {
-        if (parkingSpotId != null) {
-            firestore.collection("parkingSpots").document(parkingSpotId!!)
-                .update("filled", true)
-                .addOnSuccessListener {
-                    Toast.makeText(this, "Parking spot updated to filled!", Toast.LENGTH_SHORT)
-                        .show()
-
-                    // Set the result to indicate success and the new filled status
-                    val resultIntent = Intent().apply {
-                        putExtra("IS_FILLED", true) // Pass back the filled status
-                        putExtra("PARKING_SPOT_ID", parkingSpotId) // Optional: pass the spot ID
-                    }
-                    setResult(RESULT_OK, resultIntent)
-                    finish() // Close the activity
-                }
-                .addOnFailureListener {
-                    Toast.makeText(
-                        this,
-                        "Failed to update parking spot filled status",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
         }
     }
 }
-
